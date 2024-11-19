@@ -1485,9 +1485,15 @@ class ModelSerializer(Serializer):
             unique_constraint_field = model._meta.get_field(unique_constraint_name)
 
             if getattr(unique_constraint_field, 'auto_now_add', None):
-                default = CreateOnlyDefault(timezone.now)
+                if isinstance(unique_constraint_field, models.DateField):
+                    default = CreateOnlyDefault(timezone.localdate)
+                else:
+                    default = CreateOnlyDefault(timezone.now)
             elif getattr(unique_constraint_field, 'auto_now', None):
-                default = timezone.now
+                if isinstance(unique_constraint_field, models.DateField):
+                    default = timezone.localdate
+                else:
+                    default = timezone.now
             elif unique_constraint_field.has_default():
                 default = unique_constraint_field.default
             else:
